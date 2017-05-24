@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+   <!--  <meta http-equiv="Content-Security-Policy" content="default-src * https://*; 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+	
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+
+    <!--<link rel="stylesheet" type="text/css" href="css/index.css" />-->
+	 <!-- Angular Material style sheet -->
+  <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+  
+    <title>Ascendas Bike Pass Checking Alerts</title>
+</head>
+
+<body ng-app="BikePassApp" ng-controller="BikePassCtrl" ng-cloak>
+    <!--<div class="app">
+        <h1>PhoneGap 1</h1>
+        <div id="deviceready" class="blink">
+            <p class="event listening">Connecting to Device</p> 	 	
+            <p class="event received">Device is Ready hello</p>
+        </div>
+    </div>-->
+	<div layout="column" layout-fill>
+  <md-toolbar>
+
+    <div class="md-toolbar-tools">
+      <h3 md-truncate flex>Ascendas Bike Pass Checking Alerts</h3>
+    </div>
+
+  </md-toolbar>
+  <md-content>
+     <section>
+      <md-subheader class="md-primary">Inform about Checking
+	   <md-button class="md-icon-button test-tooltip" aria-label="Refresh">
+        <md-tooltip md-direction="left">Anonymously notify other app users about checking</md-tooltip>
+        <img src="img/ic_help_black_24dp_1x.png"/>
+      </md-button>
+	  
+	  </md-subheader>
+	  <md-list layout-padding>
+      <md-list-item class="md-3-line" ng-click="null">
+
+          <div class="md-list-item-text" layout="column">
+            <h3>Is Checking happening at Gate #1?</h3>
+			<section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
+			<md-button class=" md-raised md-warn" ng-click="gate1Yes()">Yes</md-button>
+			<md-button class="md-raised" ng-click="gate1No()">No</md-button> 
+			</section>
+          </div>
+        </md-list-item>
+		<md-list-item class="md-3-line" ng-click="null">
+  
+          <div class="md-list-item-text" layout="column">
+            <h3>Is Checking happening at Gate #2?</h3>
+			<section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
+			<md-button class=" md-raised md-warn" ng-click="gate2Yes()">Yes</md-button>
+			<md-button class="md-raised" ng-click="gate2No()">No</md-button> 
+			</section>
+          </div>
+        </md-list-item>
+		 </md-list>
+    </section>
+	
+	 <section>
+      <md-subheader class="md-primary">Subscribe for Email Alerts</md-subheader>
+	  <div layout="column" layout-align="center">
+	   <form name="projectForm">
+	  <md-input-container>
+        <label>Email</label>
+        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/"/>
+		  <div ng-messages="projectForm.subEmailName.$error" role="alert">
+          <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
+            Your email must be between 10 and 100 characters long and look like an e-mail address.
+          </div>
+        </div>
+      </md-input-container>
+	  </form>
+		<md-button class="md-raised md-primary" flex ng-hide="isSubscribed" ng-click="subscribe()">Subscribe</md-button>
+		<md-button class="md-raised md-primary" flex ng-show="isSubscribed" ng-click="unSubscribe()">UnSubscribe</md-button>
+		</div>
+	  </section
+  </md-content>
+</div>
+	
+	
+	
+	
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+      <!-- Angular Material requires Angular.js Libraries -->
+ <script src="/node_modules/angular/angular.js"></script>
+	<script src="/node_modules/angular-aria/angular-aria.js"></script>
+	<script src="/node_modules/angular-animate/angular-animate.js"></script>
+	<script src="/node_modules/angular-material/angular-material.js"></script>
+
+
+  
+
+	<script type="text/javascript">
+       // app.initialize();
+    </script>
+	  <!-- Your application bootstrap  -->
+  <script type="text/javascript">    
+    /**
+     * You must include the dependency on 'ngMaterial' 
+     */
+   var app= angular.module('BikePassApp', ['ngMaterial']);
+   app.controller('BikePassCtrl', function($scope,$http,$sce,$mdToast,$window) {
+   
+   if($window.localStorage.getItem("subEmail") && $window.localStorage.getItem("subEmail")!='null'){
+   $scope.subEmail=$window.localStorage.getItem("subEmail");
+   $scope.isSubscribed=true;
+   }else{
+   $scope.subEmail='';
+   $scope.isSubscribed=false;
+   }
+   
+   $scope.subscribe=function(){
+   
+   if(!$scope.subEmail || $scope.subEmail==""){
+   return;
+   }
+	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=subscribe&emailId="+encodeURIComponent($scope.subEmail))
+    .then(function(response) {
+        //First function handles success
+       // $scope.content = response.data;
+	   $window.localStorage.setItem("subEmail",$scope.subEmail);
+	   $scope.isSubscribed=true;
+	   $mdToast.show($mdToast.simple().textContent('You have subscribed successfully!'));
+	   console.log(response);
+    }, function(response) {
+        //Second function handles error
+        //$scope.content = "Something went wrong";
+		//$window.localStorage.setItem("subEmail",null);
+		//$scope.subEmail="";
+		 console.log(response);
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+   };
+   
+   $scope.unSubscribe=function(){
+   
+      if(!$scope.subEmail || $scope.subEmail==""){
+   return;
+   }
+   
+   $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=unsubscribe&emailId="+encodeURIComponent($scope.subEmail))
+    .then(function(response) {
+        //First function handles success
+       // $scope.content = response.data;
+	    $window.localStorage.setItem("subEmail",'');
+		$scope.subEmail="";
+		$scope.isSubscribed=false;
+	   $mdToast.show($mdToast.simple().textContent('You have now unsubcribed our services'));
+	   console.log(response);
+    }, function(response) {
+        //Second function handles error
+        //$scope.content = "Something went wrong";
+		 console.log(response);
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+   };
+   
+   $scope.gate1Yes=function(){
+	
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=true")
+    .then(function(response) {
+        //First function handles success
+       // $scope.content = response.data;
+	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
+	   console.log(response);
+    }, function(response) {
+        //Second function handles error
+        //$scope.content = "Something went wrong";
+		 console.log(response);
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+	
+   };//end of function
+   
+   
+   $scope.gate2Yes=function(){
+	
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=true")
+    .then(function(response) {
+        //First function handles success
+       // $scope.content = response.data;
+	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
+	   console.log(response);
+    }, function(response) {
+        //Second function handles error
+        //$scope.content = "Something went wrong";
+		 console.log(response);
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+	
+   };//end of function
+   
+   $scope.gate1No=function(){
+	
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=false")
+    .then(function(response) {
+        //First function handles success
+       // $scope.content = response.data;
+	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
+	   console.log(response);
+    }, function(response) {
+        //Second function handles error
+        //$scope.content = "Something went wrong";
+		 console.log(response);
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+	
+   };//end of function
+   
+   $scope.gate2No=function(){
+	
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=false")
+    .then(function(response) {
+        //First function handles success
+       // $scope.content = response.data;
+	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
+	   console.log(response);
+    }, function(response) {
+        //Second function handles error
+        //$scope.content = "Something went wrong";
+		 console.log(response);
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+	
+   };//end of function
+   
+});
+   
+  </script>
+	
+</body>
+
+</html>
