@@ -34,7 +34,7 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         //app.receivedEvent('deviceready');
-		  document.removeEventListener('deviceready', onDeviceReady, false);
+		  document.removeEventListener('deviceready', this.onDeviceReady, false);
 		 admob.setOptions({
 			publisherId:  "ca-app-pub-7830155450711523/8193228147" 
      
