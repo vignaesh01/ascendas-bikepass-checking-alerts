@@ -33,9 +33,10 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        //app.receivedEvent('deviceready');
+		  document.removeEventListener('deviceready', onDeviceReady, false);
 		 admob.setOptions({
-        publisherId:          "ca-app-pub-7830155450711523/8193228147",  // Required
+			publisherId:  "ca-app-pub-7830155450711523/8193228147" 
      
       
       });
