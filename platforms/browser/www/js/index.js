@@ -27,22 +27,36 @@ var app = {
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
+		document.addEventListener("offline", this.onOffline, false);
     },
     // deviceready Event Handler
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        //app.receivedEvent('deviceready');
+		//  document.removeEventListener('deviceready', this.onDeviceReady, false);
 		 admob.setOptions({
-        publisherId:          "ca-app-pub-7830155450711523/8193228147",  // Required
+			publisherId:  "ca-app-pub-7830155450711523/8193228147" 
      
       
       });
       
       // Start showing banners (atomatic when autoShowBanner is set to true)
       admob.createBannerView();
+	 /* var networkState = navigator.connection.type;
+	  console.log('networkState '+networkState);
+	  if(networkState==Connection.NONE){
+	   var scope=angular.element(document.getElementById('ngContainer')).scope();
+	   scope.networkStatus();
+	   
+	  }*/
+	  
     },
+	onOffline : function(){
+		 var scope=angular.element(document.getElementById('ngContainer')).scope();
+		 scope.networkStatus();
+	},
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         var parentElement = document.getElementById(id);

@@ -46,7 +46,7 @@
     <title>Ascendas Bike Pass Checking Alerts</title>
 </head>
 
-<body ng-app="BikePassApp" ng-controller="BikePassCtrl" ng-cloak>
+<body id="ngContainer" ng-app="BikePassApp" ng-controller="BikePassCtrl" ng-cloak>
     <!--<div class="app">
         <h1>PhoneGap 1</h1>
         <div id="deviceready" class="blink">
@@ -65,9 +65,12 @@
   <md-content>
      <section>
       <md-subheader class="md-primary">Inform about Checking
-	   <md-button class="md-icon-button test-tooltip" aria-label="Refresh">
+	   <md-button class="md-icon-button test-tooltip" aria-label="help">
         <md-tooltip md-direction="left">Anonymously notify other app users about checking</md-tooltip>
         <img src="img/ic_help_black_24dp_1x.png"/>
+      </md-button>
+	  <md-button class="md-icon-button" aria-label="Refresh" ng-click="getCurrentStatus()">
+        <img src="img/ic_refresh_black_24dp_1x.png"/>
       </md-button>
 	  
 	  </md-subheader>
@@ -79,8 +82,9 @@
           <div class="md-list-item-text" layout="column">
             <h3>Is Checking happening at Gate #1?</h3>
 			<section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-			<md-button class=" md-raised md-warn" ng-click="gate1Yes()">Yes</md-button>
-			<md-button class="md-raised" ng-click="gate1No()">No</md-button> 
+				<md-switch ng-model="gate1Status" class="md-warn" aria-label="Gate 1 status" ng-change="onChangeGate1()">
+					{{ gate1Message }}
+				</md-switch>
 			</section>
           </div>
         </md-list-item>
@@ -89,8 +93,9 @@
           <div class="md-list-item-text" layout="column">
             <h3>Is Checking happening at Gate #2?</h3>
 			<section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-			<md-button class=" md-raised md-warn" ng-click="gate2Yes()">Yes</md-button>
-			<md-button class="md-raised" ng-click="gate2No()">No</md-button> 
+			<md-switch ng-model="gate2Status" class="md-warn" aria-label="Gate 2 status" ng-change="onChangeGate2()">
+					{{ gate2Message }}
+			</md-switch>
 			</section>
           </div>
         </md-list-item>
@@ -157,6 +162,101 @@
    
    $scope.showInformProgress=false;
    $scope.showSubProgress=false;
+   $scope.gate1Status=false;
+   $scope.gate1Message="No,it's not happening";
+   $scope.gate2Status=false;
+   $scope.gate2Message="No,it's not happening";
+   
+   $scope.getCurrentStatus=function(){
+		$scope.showInformProgress=true;
+	
+	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=currentstatus")
+    .then(function(response) {
+        //First function handles success
+		console.log(response.data);
+       var content = response.data;
+	   $scope.gate1Status=content.gate1;
+	   $scope.gate2Status=content.gate2;
+	   
+	   if($scope.gate1Status){
+	   $scope.gate1Message="Yes,it's happening";
+	   }else{
+	   $scope.gate1Message="No,it's not happening";
+	   }
+	   
+	   if($scope.gate2Status){
+	   $scope.gate2Message="Yes,it's happening";
+	   }else{
+	   $scope.gate2Message="No,it's not happening";
+	   }
+	   
+	   
+	   $scope.showInformProgress=false;
+    }, function(response) {
+        //Second function handles error
+
+		 console.log(response);
+		 $scope.showInformProgress=false;
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+   }
+   
+   $scope.onChangeGate1=function(){
+		navigator.notification.confirm(
+		'Are you sure?', // message
+		onConfirmGate1,            // callback to invoke with index of button pressed
+		'Confirmation',           // title
+		['Yes','No']     // buttonLabels
+	);	
+   }
+   
+   function onConfirmGate1(buttonIndex) {
+	
+	if(buttonIndex==1){
+		if($scope.gate1Status){
+		//$scope.gate1Message="Yes,it's happening";
+		$scope.gate1Yes();
+		}else{
+		//$scope.gate1Message="No,it's not happening";
+		$scope.gate1No();
+		}
+	}
+	else{
+		$scope.gate1Status=!$scope.gate1Status;
+	}
+	
+	//$scope.$apply();
+}
+	
+ 
+   $scope.onChangeGate2=function(){
+		navigator.notification.confirm(
+		'Are you sure?', // message
+		onConfirmGate2,            // callback to invoke with index of button pressed
+		'Confirmation',           // title
+		['Yes','No']     // buttonLabels
+	);	
+   }
+   
+   function onConfirmGate2(buttonIndex) {
+	
+	if(buttonIndex==1){
+		if($scope.gate2Status){
+		//$scope.gate2Message="Yes,it's happening";
+		$scope.gate2Yes();
+		}else{
+		//$scope.gate2Message="No,it's not happening";
+		$scope.gate2No();
+		}
+	}
+	else{
+		$scope.gate2Status=!$scope.gate2Status;
+	}
+	
+	//$scope.$apply();
+}
+	
+	
    $scope.subscribe=function(){
   
    if(!$scope.subEmail || $scope.subEmail==""){
@@ -220,12 +320,14 @@
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
 	    $scope.showInformProgress=false;
+		$scope.gate1Message="Yes,it's happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
 		 $scope.showInformProgress=false;
+		 $scope.gate1Status=!$scope.gate1Status;
     });
 	
    };//end of function
@@ -240,12 +342,14 @@
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
 	    $scope.showInformProgress=false;
+		$scope.gate2Message="Yes,it's happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
 		 $scope.showInformProgress=false;
+		 $scope.gate2Status=!$scope.gate2Status;
     });
 	
    };//end of function
@@ -259,12 +363,14 @@
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
 	    $scope.showInformProgress=false;
+		$scope.gate1Message="No,it's not happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
 		 $scope.showInformProgress=false;
+		 $scope.gate1Status=!$scope.gate1Status;
     });
 	
    };//end of function
@@ -278,18 +384,26 @@
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
 	    $scope.showInformProgress=false;
+		$scope.gate2Message="No,it's not happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
 		 $scope.showInformProgress=false;
+		 $scope.gate2Status=!$scope.gate2Status;
     });
 	
    };//end of function
    
+   $scope.networkStatus=function(){
+   $mdToast.show($mdToast.simple().textContent('No Network Connection!'));
+   };
+   
+    $scope.getCurrentStatus();//initialize
 });
    
+  
   </script>
 	
 </body>

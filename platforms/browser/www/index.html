@@ -41,12 +41,12 @@
 
     <!--<link rel="stylesheet" type="text/css" href="css/index.css" />-->
 	 <!-- Angular Material style sheet -->
-  <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+  <link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
   
     <title>Ascendas Bike Pass Checking Alerts</title>
 </head>
 
-<body ng-app="BikePassApp" ng-controller="BikePassCtrl" ng-cloak>
+<body id="ngContainer" ng-app="BikePassApp" ng-controller="BikePassCtrl" ng-cloak>
     <!--<div class="app">
         <h1>PhoneGap 1</h1>
         <div id="deviceready" class="blink">
@@ -65,20 +65,26 @@
   <md-content>
      <section>
       <md-subheader class="md-primary">Inform about Checking
-	   <md-button class="md-icon-button test-tooltip" aria-label="Refresh">
+	   <md-button class="md-icon-button test-tooltip" aria-label="help">
         <md-tooltip md-direction="left">Anonymously notify other app users about checking</md-tooltip>
         <img src="img/ic_help_black_24dp_1x.png"/>
       </md-button>
+	  <md-button class="md-icon-button" aria-label="Refresh" ng-click="getCurrentStatus()">
+        <img src="img/ic_refresh_black_24dp_1x.png"/>
+      </md-button>
 	  
 	  </md-subheader>
+	  <div layout="row" layout-sm="column" layout-align="space-around" ng-show="showInformProgress">
+	  <md-progress-circular ng-disabled="!showInformProgress" class="md-hue-2" md-diameter="20px"></md-progress-circular></div>
 	  <md-list layout-padding>
       <md-list-item class="md-3-line" ng-click="null">
 
           <div class="md-list-item-text" layout="column">
             <h3>Is Checking happening at Gate #1?</h3>
 			<section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-			<md-button class=" md-raised md-warn" ng-click="gate1Yes()">Yes</md-button>
-			<md-button class="md-raised" ng-click="gate1No()">No</md-button> 
+				<md-switch ng-model="gate1Status" class="md-warn" aria-label="Gate 1 status" ng-change="onChangeGate1()">
+					{{ gate1Message }}
+				</md-switch>
 			</section>
           </div>
         </md-list-item>
@@ -87,8 +93,9 @@
           <div class="md-list-item-text" layout="column">
             <h3>Is Checking happening at Gate #2?</h3>
 			<section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-			<md-button class=" md-raised md-warn" ng-click="gate2Yes()">Yes</md-button>
-			<md-button class="md-raised" ng-click="gate2No()">No</md-button> 
+			<md-switch ng-model="gate2Status" class="md-warn" aria-label="Gate 2 status" ng-change="onChangeGate2()">
+					{{ gate2Message }}
+			</md-switch>
 			</section>
           </div>
         </md-list-item>
@@ -96,12 +103,16 @@
     </section>
 	
 	 <section>
-      <md-subheader class="md-primary">Subscribe for Email Alerts</md-subheader>
+      <md-subheader class="md-primary">Subscribe for Email Alerts
+
+	  </md-subheader>
+	  <div layout="row" layout-sm="column" layout-align="space-around" ng-show="showSubProgress">
+	   <md-progress-circular ng-disabled="!showSubProgress" class="md-hue-2" md-diameter="20px"></md-progress-circular></div>
 	  <div layout="column" layout-align="center">
 	   <form name="projectForm">
 	  <md-input-container>
         <label>Email</label>
-        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/"/>
+        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" ng-readonly="isSubscribed"/>
 		  <div ng-messages="projectForm.subEmailName.$error" role="alert">
           <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
             Your email must be between 10 and 100 characters long and look like an e-mail address.
@@ -122,16 +133,16 @@
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
       <!-- Angular Material requires Angular.js Libraries -->
- <script src="/node_modules/angular/angular.js"></script>
-	<script src="/node_modules/angular-aria/angular-aria.js"></script>
-	<script src="/node_modules/angular-animate/angular-animate.js"></script>
-	<script src="/node_modules/angular-material/angular-material.js"></script>
+ <script src="node_modules/angular/angular.js"></script>
+	<script src="node_modules/angular-aria/angular-aria.js"></script>
+	<script src="node_modules/angular-animate/angular-animate.js"></script>
+	<script src="node_modules/angular-material/angular-material.js"></script>
 
 
   
 
 	<script type="text/javascript">
-       // app.initialize();
+        app.initialize();
     </script>
 	  <!-- Your application bootstrap  -->
   <script type="text/javascript">    
@@ -149,11 +160,111 @@
    $scope.isSubscribed=false;
    }
    
-   $scope.subscribe=function(){
+   $scope.showInformProgress=false;
+   $scope.showSubProgress=false;
+   $scope.gate1Status=false;
+   $scope.gate1Message="No,it's not happening";
+   $scope.gate2Status=false;
+   $scope.gate2Message="No,it's not happening";
    
+   $scope.getCurrentStatus=function(){
+		$scope.showInformProgress=true;
+	
+	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=currentstatus")
+    .then(function(response) {
+        //First function handles success
+		console.log(response.data);
+       var content = response.data;
+	   $scope.gate1Status=content.gate1;
+	   $scope.gate2Status=content.gate2;
+	   
+	   if($scope.gate1Status){
+	   $scope.gate1Message="Yes,it's happening";
+	   }else{
+	   $scope.gate1Message="No,it's not happening";
+	   }
+	   
+	   if($scope.gate2Status){
+	   $scope.gate2Message="Yes,it's happening";
+	   }else{
+	   $scope.gate2Message="No,it's not happening";
+	   }
+	   
+	   
+	   $scope.showInformProgress=false;
+    }, function(response) {
+        //Second function handles error
+
+		 console.log(response);
+		 $scope.showInformProgress=false;
+		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+    });
+   }
+   
+   $scope.onChangeGate1=function(){
+		navigator.notification.confirm(
+		'Are you sure?', // message
+		onConfirmGate1,            // callback to invoke with index of button pressed
+		'Confirmation',           // title
+		['Yes','No']     // buttonLabels
+	);	
+   }
+   
+   function onConfirmGate1(buttonIndex) {
+	
+	if(buttonIndex==1){
+		if($scope.gate1Status){
+		//$scope.gate1Message="Yes,it's happening";
+		$scope.gate1Yes();
+		}else{
+		//$scope.gate1Message="No,it's not happening";
+		$scope.gate1No();
+		}
+	}
+	else{
+		$scope.gate1Status=!$scope.gate1Status;
+	}
+	
+	//$scope.$apply();
+}
+	
+ 
+   $scope.onChangeGate2=function(){
+		navigator.notification.confirm(
+		'Are you sure?', // message
+		onConfirmGate2,            // callback to invoke with index of button pressed
+		'Confirmation',           // title
+		['Yes','No']     // buttonLabels
+	);	
+   }
+   
+   function onConfirmGate2(buttonIndex) {
+	
+	if(buttonIndex==1){
+		if($scope.gate2Status){
+		//$scope.gate2Message="Yes,it's happening";
+		$scope.gate2Yes();
+		}else{
+		//$scope.gate2Message="No,it's not happening";
+		$scope.gate2No();
+		}
+	}
+	else{
+		$scope.gate2Status=!$scope.gate2Status;
+	}
+	
+	//$scope.$apply();
+}
+	
+	
+   $scope.subscribe=function(){
+  
    if(!$scope.subEmail || $scope.subEmail==""){
    return;
    }
+   
+    $scope.showSubProgress=true;
+	
 	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=subscribe&emailId="+encodeURIComponent($scope.subEmail))
     .then(function(response) {
         //First function handles success
@@ -162,12 +273,14 @@
 	   $scope.isSubscribed=true;
 	   $mdToast.show($mdToast.simple().textContent('You have subscribed successfully!'));
 	   console.log(response);
+	   $scope.showSubProgress=false;
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		//$window.localStorage.setItem("subEmail",null);
 		//$scope.subEmail="";
 		 console.log(response);
+		 $scope.showSubProgress=false;
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
     });
    };
@@ -178,6 +291,7 @@
    return;
    }
    
+    $scope.showSubProgress=true;
    $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=unsubscribe&emailId="+encodeURIComponent($scope.subEmail))
     .then(function(response) {
         //First function handles success
@@ -187,85 +301,109 @@
 		$scope.isSubscribed=false;
 	   $mdToast.show($mdToast.simple().textContent('You have now unsubcribed our services'));
 	   console.log(response);
+	    $scope.showSubProgress=false;
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+		 $scope.showSubProgress=false;
     });
    };
    
    $scope.gate1Yes=function(){
-	
+	 $scope.showInformProgress=true;
 	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
+	    $scope.showInformProgress=false;
+		$scope.gate1Message="Yes,it's happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+		 $scope.showInformProgress=false;
+		 $scope.gate1Status=!$scope.gate1Status;
     });
 	
    };//end of function
    
    
    $scope.gate2Yes=function(){
-	
+	 $scope.showInformProgress=true;
 	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
+	    $scope.showInformProgress=false;
+		$scope.gate2Message="Yes,it's happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+		 $scope.showInformProgress=false;
+		 $scope.gate2Status=!$scope.gate2Status;
     });
 	
    };//end of function
    
    $scope.gate1No=function(){
-	
+	 $scope.showInformProgress=true;
 	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
+	    $scope.showInformProgress=false;
+		$scope.gate1Message="No,it's not happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+		 $scope.showInformProgress=false;
+		 $scope.gate1Status=!$scope.gate1Status;
     });
 	
    };//end of function
    
    $scope.gate2No=function(){
-	
+	 $scope.showInformProgress=true;
 	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
 	   $mdToast.show($mdToast.simple().textContent('Hurray! you helped others'));
 	   console.log(response);
+	    $scope.showInformProgress=false;
+		$scope.gate2Message="No,it's not happening";
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+		 $scope.showInformProgress=false;
+		 $scope.gate2Status=!$scope.gate2Status;
     });
 	
    };//end of function
    
+   $scope.networkStatus=function(){
+   $mdToast.show($mdToast.simple().textContent('No Network Connection!'));
+   };
+   
+    $scope.getCurrentStatus();//initialize
 });
    
+  
   </script>
 	
 </body>
