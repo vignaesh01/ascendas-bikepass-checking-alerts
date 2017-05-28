@@ -223,11 +223,70 @@
 	}
 	else{
 		$scope.gate1Status=!$scope.gate1Status;
-	}
+		$scope.$apply();	
+		
+	}//end else
 	
-	$scope.$apply();
+	
 }
 	
+	function sendSMTPEmail(bccData,gateNum){
+	
+	if(!bccData || bccData.length==0){
+	return;
+	}
+		var email = {
+        "html" : "",
+        "text" : "Bike Pass Checking going on @ Gate "+gateNum+". Bring your bike pass without fail.",
+        "subject" : "Bike Pass Checking going on @ Gate "+gateNum,
+        "from" : {
+            "name" : "Ascendas Bike Pass Checking Alerts",
+            "email" : "ascendasbikepasscheckingalerts@22x4kfiugsv8iofjri0ow7w6tlnieupczvtcrg44i3da4zjjeq.7f-q2wwuai.ap5.apex.salesforce.com"
+        },
+       "to" : [{"name" : "Ascendas Bike Pass Checking Alerts",
+            "email" : "ascendasbikepasscheckingalerts@22x4kfiugsv8iofjri0ow7w6tlnieupczvtcrg44i3da4zjjeq.7f-q2wwuai.ap5.apex.salesforce.com"}],
+        "bcc" : bccData
+    };
+	
+	 var data = {
+        email: serialize(email)
+    };
+	
+	var req = {
+ method: 'POST',
+ url: 'https://api.sendpulse.com/oauth/access_token',
+ data: { client_id: 'ba6256742f85c2e1da10a8f74b700c2f' ,
+		client_secret:'49698228a6fb6349f3cdc64c0dceecbc',
+		grant_type:'client_credentials'
+		}
+};
+	console.log(serialize(email));
+	$http(req).then(function(response){
+	console.log(response.data);
+		var reqEmail = {
+		 method: 'POST',
+		 url: 'https://api.sendpulse.com/smtp/emails',
+		 headers: {
+		   'Authorization': 'Bearer '+response.data.access_token
+		 },
+		 data: { 
+				email: serialize(email)
+				}
+		};
+		
+	$http(reqEmail).then(function(response){
+		console.log(response.data);
+	
+	},function(response){});
+	
+	}, 
+	function(response){
+	console.log(response.data);
+	
+	});
+	
+	
+	}
  
    $scope.onChangeGate2=function(){
 		navigator.notification.confirm(
@@ -251,9 +310,10 @@
 	}
 	else{
 		$scope.gate2Status=!$scope.gate2Status;
+		$scope.$apply();
 	}
 	
-	$scope.$apply();
+	
 }
 	
 	
@@ -313,7 +373,7 @@
    
    $scope.gate1Yes=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=true")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -321,6 +381,7 @@
 	   console.log(response);
 	    $scope.showInformProgress=false;
 		$scope.gate1Message="Yes,it's happening";
+		sendSMTPEmail(response.data,"1");
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
@@ -335,7 +396,7 @@
    
    $scope.gate2Yes=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=true")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -343,6 +404,7 @@
 	   console.log(response);
 	    $scope.showInformProgress=false;
 		$scope.gate2Message="Yes,it's happening";
+		sendSMTPEmail(response.data,"2");
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
@@ -356,7 +418,7 @@
    
    $scope.gate1No=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=false")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -377,7 +439,7 @@
    
    $scope.gate2No=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=false")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -399,6 +461,98 @@
    $scope.networkStatus=function(){
    $mdToast.show($mdToast.simple().textContent('No Network Connection!'));
    };
+   
+   function serialize(mixed_value) {
+    var val, key, okey,
+        ktype = '',
+        vals = '',
+        count = 0,
+        _utf8Size = function (str) {
+            var size = 0,
+                i = 0,
+                l = str.length,
+                code = '';
+            for (i = 0; i < l; i++) {
+                code = str.charCodeAt(i);
+                if (code < 0x0080) {
+                    size += 1;
+                } else if (code < 0x0800) {
+                    size += 2;
+                } else {
+                    size += 3;
+                }
+            }
+            return size;
+        },
+        _getType = function (inp) {
+            var match, key, cons, types, type = typeof inp;
+
+            if (type === 'object' && !inp) {
+                return 'null';
+            }
+
+            if (type === 'object') {
+                if (!inp.constructor) {
+                    return 'object';
+                }
+                cons = inp.constructor.toString();
+                match = cons.match(/(\w+)\(/);
+                if (match) {
+                    cons = match[1].toLowerCase();
+                }
+                types = ['boolean', 'number', 'string', 'array'];
+                for (key in types) {
+                    if (cons == types[key]) {
+                        type = types[key];
+                        break;
+                    }
+                }
+            }
+            return type;
+        },
+        type = _getType(mixed_value);
+
+    switch (type) {
+        case 'function':
+            val = '';
+            break;
+        case 'boolean':
+            val = 'b:' + (mixed_value ? '1' : '0');
+            break;
+        case 'number':
+            val = (Math.round(mixed_value) == mixed_value ? 'i' : 'd') + ':' + mixed_value;
+            break;
+        case 'string':
+            val = 's:' + _utf8Size(mixed_value) + ':"' + mixed_value + '"';
+            break;
+        case 'array':
+        case 'object':
+            val = 'a';
+            for (key in mixed_value) {
+                if (mixed_value.hasOwnProperty(key)) {
+                    ktype = _getType(mixed_value[key]);
+                    if (ktype === 'function') {
+                        continue;
+                    }
+
+                    okey = (key.match(/^[0-9]+$/) ? parseInt(key, 10) : key);
+                    vals += serialize(okey) + serialize(mixed_value[key]);
+                    count++;
+                }
+            }
+            val += ':' + count + ':{' + vals + '}';
+            break;
+        case 'undefined':
+        default:
+            val = 'N';
+            break;
+    }
+    if (type !== 'object' && type !== 'array') {
+        val += ';';
+    }
+    return val;
+}
+
    
     $scope.getCurrentStatus();//initialize
 });
