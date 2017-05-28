@@ -112,10 +112,10 @@
 	   <form name="projectForm">
 	  <md-input-container>
         <label>Email</label>
-        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" ng-readonly="isSubscribed"/>
+        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" ng-readonly="isSubscribed" />
 		  <div ng-messages="projectForm.subEmailName.$error" role="alert">
           <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
-            Enter a valid e-mail address.
+           Oops! you missed to enter an email address.Please subscribe with a valid e-mail address.
           </div>
         </div>
       </md-input-container>
