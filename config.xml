@@ -20,7 +20,7 @@
 	<plugin name="cordova-plugin-fcm-config" spec="https://github.com/vignaesh01/cordova-plugin-fcm-config"/>
 
     <plugin name="cordova-plugin-whitelist" source="npm" spec="~1.2.1" />
-	<gap:plugin name="phonegap-admob" source="npm"/>
+	<plugin name="phonegap-admob" source="npm"/>
     <platform name="ios">
         <icon src="www/res/icons/ios/icon-small.png" width="29" height="29" />
         <icon src="www/res/icons/ios/icon-small-2x.png" width="58" height="58" />
