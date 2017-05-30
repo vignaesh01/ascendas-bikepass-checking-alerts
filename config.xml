@@ -17,6 +17,7 @@
     <plugin name="cordova-plugin-network-information" source="npm" spec="~1.2.0" />
     <plugin name="cordova-plugin-dialogs" source="npm"/>
 	<plugin name="cordova-plugin-fcm" source="npm"/>
+	<plugin name="phonegap-plugin-push" source="npm"/>
 
     <plugin name="cordova-plugin-whitelist" source="npm" spec="~1.2.1" />
 	<gap:plugin name="phonegap-admob" source="npm"/>
