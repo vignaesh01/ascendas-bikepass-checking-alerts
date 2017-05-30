@@ -77,7 +77,7 @@
 	  <div layout="row" layout-sm="column" layout-align="space-around" ng-show="showInformProgress">
 	  <md-progress-circular ng-disabled="!showInformProgress" class="md-hue-2" md-diameter="20px"></md-progress-circular></div>
 	  <md-list layout-padding>
-      <md-list-item class="md-3-line" ng-click="null">
+      <md-list-item class="md-3-line md-no-proxy">
 
           <div class="md-list-item-text" layout="column">
             <h3>Is Checking happening at Gate #1?</h3>
@@ -88,7 +88,7 @@
 			</section>
           </div>
         </md-list-item>
-		<md-list-item class="md-3-line" ng-click="null">
+		<md-list-item class="md-3-line md-no-proxy">
   
           <div class="md-list-item-text" layout="column">
             <h3>Is Checking happening at Gate #2?</h3>
@@ -103,23 +103,23 @@
     </section>
 	
 	 <section>
-      <md-subheader class="md-primary">Subscribe for Email Alerts
+      <md-subheader class="md-primary">Subscribe for Alerts
 
 	  </md-subheader>
 	  <div layout="row" layout-sm="column" layout-align="space-around" ng-show="showSubProgress">
 	   <md-progress-circular ng-disabled="!showSubProgress" class="md-hue-2" md-diameter="20px"></md-progress-circular></div>
 	  <div layout="column" layout-align="center">
-	   <form name="projectForm">
+	  <!-- <form name="projectForm">
 	  <md-input-container>
         <label>Email</label>
-        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" ng-readonly="isSubscribed"/>
+        <input required ng-model="subEmail" type="email" name="subEmailName"  minlength="10" maxlength="100" ng-pattern="/^.+@.+\..+$/" ng-readonly="isSubscribed" />
 		  <div ng-messages="projectForm.subEmailName.$error" role="alert">
           <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
-            Your email must be between 10 and 100 characters long and look like an e-mail address.
+           Oops! you missed to enter an email address.Please subscribe with a valid e-mail address.
           </div>
         </div>
       </md-input-container>
-	  </form>
+	  </form>-->
 		<md-button class="md-raised md-primary" flex ng-hide="isSubscribed" ng-click="subscribe()">Subscribe</md-button>
 		<md-button class="md-raised md-primary" flex ng-show="isSubscribed" ng-click="unSubscribe()">UnSubscribe</md-button>
 		</div>
@@ -152,11 +152,19 @@
    var app= angular.module('BikePassApp', ['ngMaterial']);
    app.controller('BikePassCtrl', function($scope,$http,$sce,$mdToast,$window) {
    
-   if($window.localStorage.getItem("subEmail") && $window.localStorage.getItem("subEmail")!='null'){
+  /* if($window.localStorage.getItem("subEmail") && $window.localStorage.getItem("subEmail")!='null'){
    $scope.subEmail=$window.localStorage.getItem("subEmail");
    $scope.isSubscribed=true;
    }else{
    $scope.subEmail='';
+   $scope.isSubscribed=false;
+   }*/
+   
+   if($window.localStorage.getItem("isSubscribed") && $window.localStorage.getItem("isSubscribed")!='null'){
+   //$scope.subEmail=$window.localStorage.getItem("subEmail");
+   $scope.isSubscribed=true;
+   }else{
+   //$scope.subEmail='';
    $scope.isSubscribed=false;
    }
    
@@ -223,11 +231,70 @@
 	}
 	else{
 		$scope.gate1Status=!$scope.gate1Status;
-	}
+		$scope.$apply();	
+		
+	}//end else
 	
-	//$scope.$apply();
+	
 }
 	
+	function sendSMTPEmail(bccData,gateNum){
+	
+	if(!bccData || bccData.length==0){
+	return;
+	}
+		var email = {
+        "html" : "",
+        "text" : "Bike Pass Checking going on @ Gate "+gateNum+". Bring your bike pass without fail.",
+        "subject" : "Bike Pass Checking going on @ Gate "+gateNum,
+        "from" : {
+            "name" : "Ascendas Bike Pass Checking Alerts",
+            "email" : "ascendasbikepasscheckingalerts@22x4kfiugsv8iofjri0ow7w6tlnieupczvtcrg44i3da4zjjeq.7f-q2wwuai.ap5.apex.salesforce.com"
+        },
+       "to" : [{"name" : "Ascendas Bike Pass Checking Alerts",
+            "email" : "ascendasbikepasscheckingalerts@22x4kfiugsv8iofjri0ow7w6tlnieupczvtcrg44i3da4zjjeq.7f-q2wwuai.ap5.apex.salesforce.com"}],
+        "bcc" : bccData
+    };
+	
+	 var data = {
+        email: serialize(email)
+    };
+	
+	var req = {
+ method: 'POST',
+ url: 'https://api.sendpulse.com/oauth/access_token',
+ data: { client_id: 'ba6256742f85c2e1da10a8f74b700c2f' ,
+		client_secret:'49698228a6fb6349f3cdc64c0dceecbc',
+		grant_type:'client_credentials'
+		}
+};
+	console.log(serialize(email));
+	$http(req).then(function(response){
+	console.log(response.data);
+		var reqEmail = {
+		 method: 'POST',
+		 url: 'https://api.sendpulse.com/smtp/emails',
+		 headers: {
+		   'Authorization': 'Bearer '+response.data.access_token
+		 },
+		 data: { 
+				email: serialize(email)
+				}
+		};
+		
+	$http(reqEmail).then(function(response){
+		console.log(response.data);
+	
+	},function(response){});
+	
+	}, 
+	function(response){
+	console.log(response.data);
+	
+	});
+	
+	
+	}
  
    $scope.onChangeGate2=function(){
 		navigator.notification.confirm(
@@ -251,21 +318,31 @@
 	}
 	else{
 		$scope.gate2Status=!$scope.gate2Status;
+		$scope.$apply();
 	}
 	
-	//$scope.$apply();
+	
 }
 	
 	
    $scope.subscribe=function(){
   
-   if(!$scope.subEmail || $scope.subEmail==""){
+  /* if(!$scope.subEmail || $scope.subEmail==""){
    return;
-   }
+   }*/
    
     $scope.showSubProgress=true;
-	
-	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=subscribe&emailId="+encodeURIComponent($scope.subEmail))
+	FCMPlugin.subscribeToTopic('ascBikePassCheckAlerts',function(msg){
+	$mdToast.show($mdToast.simple().textContent('You have subscribed successfully!'));
+	   console.log(msg);
+	   $scope.showSubProgress=false;
+	   $scope.isSubscribed=true;
+	},function(err){
+	$scope.showSubProgress=false;
+	$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+	console.log(err);
+	});
+	/*$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=subscribe&emailId="+encodeURIComponent($scope.subEmail))
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -282,17 +359,28 @@
 		 console.log(response);
 		 $scope.showSubProgress=false;
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
-    });
+    });*/
    };
    
    $scope.unSubscribe=function(){
    
-      if(!$scope.subEmail || $scope.subEmail==""){
+    /*  if(!$scope.subEmail || $scope.subEmail==""){
    return;
-   }
+   }*/
    
     $scope.showSubProgress=true;
-   $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=unsubscribe&emailId="+encodeURIComponent($scope.subEmail))
+	FCMPlugin.unsubscribeFromTopic('ascBikePassCheckAlerts',function(msg){
+	$mdToast.show($mdToast.simple().textContent('You have now unsubcribed our services'));
+	   console.log(msg);
+	   $scope.showSubProgress=false;
+	   $scope.isSubscribed=false;
+	},function(err){
+	$scope.showSubProgress=false;
+	$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+	console.log(err);
+	});
+	
+  /* $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=unsubscribe&emailId="+encodeURIComponent($scope.subEmail))
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -308,12 +396,14 @@
 		 console.log(response);
 		$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
 		 $scope.showSubProgress=false;
-    });
+    });*/
+	
+	
    };
    
    $scope.gate1Yes=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=true")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -321,6 +411,7 @@
 	   console.log(response);
 	    $scope.showInformProgress=false;
 		$scope.gate1Message="Yes,it's happening";
+		//sendSMTPEmail(response.data,"1");
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
@@ -335,7 +426,7 @@
    
    $scope.gate2Yes=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=true")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -343,6 +434,7 @@
 	   console.log(response);
 	    $scope.showInformProgress=false;
 		$scope.gate2Message="Yes,it's happening";
+		//sendSMTPEmail(response.data,"2");
     }, function(response) {
         //Second function handles error
         //$scope.content = "Something went wrong";
@@ -356,7 +448,7 @@
    
    $scope.gate1No=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=1&isCheck=false")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -377,7 +469,7 @@
    
    $scope.gate2No=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=notifyAll&gateNum=2&isCheck=false")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -399,6 +491,98 @@
    $scope.networkStatus=function(){
    $mdToast.show($mdToast.simple().textContent('No Network Connection!'));
    };
+   
+   function serialize(mixed_value) {
+    var val, key, okey,
+        ktype = '',
+        vals = '',
+        count = 0,
+        _utf8Size = function (str) {
+            var size = 0,
+                i = 0,
+                l = str.length,
+                code = '';
+            for (i = 0; i < l; i++) {
+                code = str.charCodeAt(i);
+                if (code < 0x0080) {
+                    size += 1;
+                } else if (code < 0x0800) {
+                    size += 2;
+                } else {
+                    size += 3;
+                }
+            }
+            return size;
+        },
+        _getType = function (inp) {
+            var match, key, cons, types, type = typeof inp;
+
+            if (type === 'object' && !inp) {
+                return 'null';
+            }
+
+            if (type === 'object') {
+                if (!inp.constructor) {
+                    return 'object';
+                }
+                cons = inp.constructor.toString();
+                match = cons.match(/(\w+)\(/);
+                if (match) {
+                    cons = match[1].toLowerCase();
+                }
+                types = ['boolean', 'number', 'string', 'array'];
+                for (key in types) {
+                    if (cons == types[key]) {
+                        type = types[key];
+                        break;
+                    }
+                }
+            }
+            return type;
+        },
+        type = _getType(mixed_value);
+
+    switch (type) {
+        case 'function':
+            val = '';
+            break;
+        case 'boolean':
+            val = 'b:' + (mixed_value ? '1' : '0');
+            break;
+        case 'number':
+            val = (Math.round(mixed_value) == mixed_value ? 'i' : 'd') + ':' + mixed_value;
+            break;
+        case 'string':
+            val = 's:' + _utf8Size(mixed_value) + ':"' + mixed_value + '"';
+            break;
+        case 'array':
+        case 'object':
+            val = 'a';
+            for (key in mixed_value) {
+                if (mixed_value.hasOwnProperty(key)) {
+                    ktype = _getType(mixed_value[key]);
+                    if (ktype === 'function') {
+                        continue;
+                    }
+
+                    okey = (key.match(/^[0-9]+$/) ? parseInt(key, 10) : key);
+                    vals += serialize(okey) + serialize(mixed_value[key]);
+                    count++;
+                }
+            }
+            val += ':' + count + ':{' + vals + '}';
+            break;
+        case 'undefined':
+        default:
+            val = 'N';
+            break;
+    }
+    if (type !== 'object' && type !== 'array') {
+        val += ';';
+    }
+    return val;
+}
+
    
     $scope.getCurrentStatus();//initialize
 });
