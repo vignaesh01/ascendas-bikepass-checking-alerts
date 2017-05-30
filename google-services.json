@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "976476609408",
+    "firebase_url": "https://ascendas-bike-pass-check-alert.firebaseio.com",
+    "project_id": "ascendas-bike-pass-check-alert",
+    "storage_bucket": "ascendas-bike-pass-check-alert.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976476609408:android:111f0a87da908d55",
+        "android_client_info": {
+          "package_name": "com.phonegap.bikepasscheck"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "976476609408-aqmeqi6521evs6vkofaufmkhdiphghkk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDC81bgEpeOsziASH6341IdA1If-EV7xv4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

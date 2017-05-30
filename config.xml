@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.phonegap.bikepasscheck" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.phonegap.bikepasscheck" version="1.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>Ascendas Bike Pass Checking Alerts</name>
     <description>
         Ascendas Bike Pass Checking Alerts
@@ -16,7 +16,7 @@
   
     <plugin name="cordova-plugin-network-information" source="npm" spec="~1.2.0" />
     <plugin name="cordova-plugin-dialogs" source="npm"/>
-
+	<plugin name="cordova-plugin-fcm" source="npm"/>
 
     <plugin name="cordova-plugin-whitelist" source="npm" spec="~1.2.1" />
 	<gap:plugin name="phonegap-admob" source="npm"/>
