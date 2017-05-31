@@ -36,14 +36,13 @@ var app = {
     onDeviceReady: function() {
         //app.receivedEvent('deviceready');
 		//  document.removeEventListener('deviceready', this.onDeviceReady, false);
-		 admob.setOptions({
-			publisherId:  "ca-app-pub-7830155450711523/8193228147" 
-     
-      
+		
+		/* admob.setOptions({
+			publisherId:  "ca-app-pub-7830155450711523/8193228147"    
       });
       
       // Start showing banners (atomatic when autoShowBanner is set to true)
-      admob.createBannerView();
+      admob.createBannerView();*/
 	 /* var networkState = navigator.connection.type;
 	  console.log('networkState '+networkState);
 	  if(networkState==Connection.NONE){

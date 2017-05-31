@@ -174,5 +174,30 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "cordova-plugin-fcm-config": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/vignaesh01/cordova-plugin-fcm-config",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "phonegap-admob": {
+        "source": {
+            "type": "registry",
+            "id": "phonegap-admob"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-connectivity-monitor": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-connectivity-monitor"
+        },
+        "is_top_level": false,
+        "variables": {}
     }
 }

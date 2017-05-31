@@ -66,6 +66,12 @@
         },
         "cordova-plugin-fcm": {
             "PACKAGE_NAME": "com.phonegap.bikepasscheck"
+        },
+        "cordova-plugin-fcm-config": {
+            "PACKAGE_NAME": "com.phonegap.bikepasscheck"
+        },
+        "phonegap-admob": {
+            "PACKAGE_NAME": "com.phonegap.bikepasscheck"
         }
     },
     "dependent_plugins": {
@@ -73,6 +79,9 @@
             "PACKAGE_NAME": "com.phonegap.bikepasscheck"
         },
         "cordova-plugin-file": {
+            "PACKAGE_NAME": "com.phonegap.bikepasscheck"
+        },
+        "cordova-connectivity-monitor": {
             "PACKAGE_NAME": "com.phonegap.bikepasscheck"
         }
     }
