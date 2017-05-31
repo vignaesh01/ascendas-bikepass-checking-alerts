@@ -337,6 +337,7 @@
 	   console.log(msg);
 	   $scope.showSubProgress=false;
 	   $scope.isSubscribed=true;
+	   $window.localStorage.setItem("isSubscribed",$scope.isSubscribed);
 	},function(err){
 	$scope.showSubProgress=false;
 	$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
@@ -374,6 +375,7 @@
 	   console.log(msg);
 	   $scope.showSubProgress=false;
 	   $scope.isSubscribed=false;
+	  $window.localStorage.setItem("isSubscribed",$scope.isSubscribed);
 	},function(err){
 	$scope.showSubProgress=false;
 	$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
