@@ -43,7 +43,7 @@
 	 <!-- Angular Material style sheet -->
   <link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
   
-    <title>Ascendas Bike Pass Checking Alerts</title>
+    <title>Ascendas Bike Pass Check Alerts</title>
 </head>
 
 <body id="ngContainer" ng-app="BikePassApp" ng-controller="BikePassCtrl" ng-cloak>
@@ -58,7 +58,7 @@
   <md-toolbar>
 
     <div class="md-toolbar-tools">
-      <h3 md-truncate flex>Ascendas Bike Pass Checking Alerts</h3>
+      <h3 md-truncate flex>Ascendas Bike Pass Check Alerts</h3>
     </div>
 
   </md-toolbar>
@@ -120,6 +120,8 @@
         </div>
       </md-input-container>
 	  </form>-->
+	  <p class="md-body-1" ng-show="isSubscribed">You have subscribed to our services</p>
+	  <p class="md-body-1" ng-hide="isSubscribed">You have not subscribed to our services yet</p>
 		<md-button class="md-raised md-primary" flex ng-hide="isSubscribed" ng-click="subscribe()">Subscribe</md-button>
 		<md-button class="md-raised md-primary" flex ng-show="isSubscribed" ng-click="unSubscribe()">UnSubscribe</md-button>
 		</div>
@@ -178,7 +180,7 @@
    $scope.getCurrentStatus=function(){
 		$scope.showInformProgress=true;
 	
-	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=currentstatus")
+	$http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/v1/BikePassNotificationService?action=currentstatus")
     .then(function(response) {
         //First function handles success
 		console.log(response.data);
@@ -369,18 +371,14 @@
    return;
    }*/
    
-    $scope.showSubProgress=true;
-	FCMPlugin.unsubscribeFromTopic('ascBikePassCheckAlerts',function(msg){
-	$mdToast.show($mdToast.simple().textContent('You have now unsubcribed our services'));
-	   console.log(msg);
-	   $scope.showSubProgress=false;
-	   $scope.isSubscribed=false;
-	  $window.localStorage.setItem("isSubscribed",$scope.isSubscribed);
-	},function(err){
-	$scope.showSubProgress=false;
-	$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
-	console.log(err);
-	});
+   navigator.notification.confirm(
+		'Do you really want to unsubscribe our services?', // message
+		onConfirmUnsubscribe,            // callback to invoke with index of button pressed
+		'Confirmation',           // title
+		['Yes','No']     // buttonLabels
+	);	
+	
+   
 	
   /* $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=unsubscribe&emailId="+encodeURIComponent($scope.subEmail))
     .then(function(response) {
@@ -403,9 +401,30 @@
 	
    };
    
+    function onConfirmUnsubscribe(buttonIndex) {
+	
+	if(buttonIndex==1){
+		 $scope.showSubProgress=true;
+	FCMPlugin.unsubscribeFromTopic('ascBikePassCheckAlerts',function(msg){
+	$mdToast.show($mdToast.simple().textContent('You have now unsubcribed our services'));
+	   console.log(msg);
+	   $scope.showSubProgress=false;
+	   $scope.isSubscribed=false;
+	  $window.localStorage.setItem("isSubscribed",$scope.isSubscribed);
+	  $scope.$apply();
+	},function(err){
+	$scope.showSubProgress=false;
+	$mdToast.show($mdToast.simple().textContent('Oops! Error occured'));
+	console.log(err);
+	$scope.$apply();
+	});
+	}
+
+}
+
    $scope.gate1Yes=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=true")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/v1/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -428,7 +447,7 @@
    
    $scope.gate2Yes=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=true")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/v1/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=true")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -450,7 +469,7 @@
    
    $scope.gate1No=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=false")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/v1/BikePassNotificationService?action=processAlerts&gateNum=1&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
@@ -471,7 +490,7 @@
    
    $scope.gate2No=function(){
 	 $scope.showInformProgress=true;
-	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=false")
+	 $http.get("https://bikepass-developer-edition.ap5.force.com/api/services/apexrest/v1/BikePassNotificationService?action=processAlerts&gateNum=2&isCheck=false")
     .then(function(response) {
         //First function handles success
        // $scope.content = response.data;
